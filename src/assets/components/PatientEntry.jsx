@@ -233,13 +233,33 @@ function PatientEntry() {
         setPatientBillHistory([]);
     };
 
-    const handleSaveNext = () => {
-        if (!formData.firstName || !formData.lastName) {
-            alert("Please enter both First and Last Name");
+    const handleFinalizeEntry = () => {
+        // 1. Mandatory Details Validation
+        if (!formData.firstName || !formData.lastName || !formData.ageValue) {
+            alert("Mandatory: Please enter Patient's Name and Age before finalizing.");
             return;
         }
-        alert("Patient Entry Saved Successfully!");
-        resetForm();
+
+        // 2. Services Validation
+        if (selectedTests.length === 0) {
+            alert("No Services Selected: Please add at least one test to generate a bill.");
+            return;
+        }
+
+        // 3. Payment Validation (Optional but good)
+        if (payable > 0 && totalPaid === 0) {
+            if (!confirm("No payment received. Proceed with generating a due bill?")) {
+                return;
+            }
+        }
+
+        // 4. Log/Simulate Saving
+        console.log("Saving Consolidated Entry:", { patient: formData, tests: selectedTests, billing: { totalFees, totalTestDiscounts, payable, totalPaid, due } });
+
+        // 5. Trigger Bill Preview (Master Action)
+        setShowCurrentBillPreview(true);
+
+        // Note: resetForm() will be called after printing/closing the receipt to prevent data loss before printing
     };
 
     const loadPatientDetail = (patient) => {
@@ -326,12 +346,12 @@ function PatientEntry() {
     const due = payable - totalPaid;
 
     return (
-        <div className="w-full h-screen bg-[#f1f5f9] font-sans flex flex-col overflow-hidden text-slate-800 select-none">
+        <div className="w-full h-screen bg-[#f1f5f9] font-sans flex flex-col overflow-hidden text-slate-700 select-none">
             {/* Window Header */}
-            <div className="bg-[#003366] px-4 py-1.5 flex items-center justify-between text-white text-[11px] font-bold shadow-md">
-                <span className="flex items-center gap-2 uppercase tracking-wide">Standard Patient Entry Master</span>
+            <div className="bg-[#003366] px-4 py-2 flex items-center justify-between text-white text-[12px] font-poppins font-medium shadow-md">
+                <span className="flex items-center gap-2 uppercase tracking-wider">Standard Patient Entry Master</span>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setShowForm(false)} className="hover:bg-red-500/80 rounded p-1 transition-all group" title="Close Module"><MdClose size={16} className="group-hover:rotate-90 transition-transform" /></button>
+                    <button onClick={() => setShowForm(false)} className="hover:bg-rose-500/80 rounded p-1 transition-all group" title="Close Module"><MdClose size={16} className="group-hover:rotate-90 transition-transform" /></button>
                 </div>
             </div>
 
@@ -344,24 +364,24 @@ function PatientEntry() {
                         <div className="flex-[1.2] flex flex-col gap-3 h-full overflow-y-auto pr-1">
                             <div className="bg-white border border-slate-300 p-4 rounded-lg shadow-sm">
                                 <fieldset className="border border-slate-200 p-4 pt-2 rounded-lg bg-slate-50/30">
-                                    <legend className="px-2 text-[11px] font-black text-blue-900 bg-white uppercase tracking-wider border border-slate-200 rounded-full">Primary Details</legend>
+                                    <legend className="px-3 text-[11px] font-poppins font-semibold text-blue-900 bg-white uppercase tracking-widest border border-slate-200 rounded-full">Primary Details</legend>
 
                                     {/* Input Fields Area */}
                                     <div className="space-y-2 mt-2">
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Reg. Date</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Reg. Date</label>
                                             <input
                                                 type="date"
                                                 name="registeredDate"
                                                 value={formData.registeredDate}
                                                 onChange={handleInputChange}
-                                                className="flex-1 p-1 bg-white border border-slate-300 rounded text-[13px] font-bold outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                                                className="flex-1 p-1 bg-white border border-slate-300 rounded text-[13px] font-semibold outline-none focus:ring-1 focus:ring-blue-400 transition-all"
                                             />
                                             {/* View Old Bills Button - Inline */}
                                             {patientBillHistory.length > 0 && (
                                                 <button
                                                     onClick={() => setShowBillHistoryModal(true)}
-                                                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-2.5 py-1.5 rounded-md font-black text-[9px] uppercase shadow-md hover:from-blue-600 hover:to-blue-700 transition-all flex items-center gap-1.5 active:scale-95 border border-blue-700 whitespace-nowrap"
+                                                    className="bg-blue-600 text-white px-2.5 py-1.5 rounded-md font-poppins font-semibold text-[9px] uppercase shadow-sm hover:bg-blue-700 transition-all flex items-center gap-1.5 active:scale-95 border border-blue-700 whitespace-nowrap"
                                                     title={`View ${patientBillHistory.length} previous transaction${patientBillHistory.length > 1 ? 's' : ''}`}
                                                 >
                                                     <MdReceipt size={14} />
@@ -371,22 +391,22 @@ function PatientEntry() {
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Ref. By Dr</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Ref. By Dr</label>
                                             <div className="flex-1 flex gap-1">
-                                                <select name="refByDr" value={formData.refByDr} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none bg-blue-50/50">
+                                                <select name="refByDr" value={formData.refByDr} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none bg-blue-50/30">
                                                     <option value="SELF">SELF (Walk-in)</option>
                                                     <option value="DR. SHARMA">DR. SHARMA</option>
                                                     <option value="DR. ADHIKARI">DR. ADHIKARI</option>
                                                 </select>
-                                                <button className="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold hover:bg-slate-300 uppercase">Add</button>
+                                                <button className="text-[10px] bg-slate-200 px-2 py-1 rounded font-poppins font-semibold hover:bg-slate-300 uppercase">Add</button>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0 pt-1.5">Patient Name</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0 pt-1.5">Patient Name</label>
                                             <div className="flex-1 flex flex-col gap-1.5">
                                                 <div className="flex gap-1">
-                                                    <select name="title" value={formData.title} onChange={handleInputChange} className="w-20 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none bg-white">
+                                                    <select name="title" value={formData.title} onChange={handleInputChange} className="w-20 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none bg-white">
                                                         <option value="MR.">MR.</option>
                                                         <option value="MRS.">MRS.</option>
                                                         <option value="MS.">MS.</option>
@@ -397,7 +417,7 @@ function PatientEntry() {
                                                         value={formData.firstName}
                                                         onChange={handleInputChange}
                                                         placeholder="First Name"
-                                                        className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none uppercase bg-white"
+                                                        className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none uppercase bg-white"
                                                     />
                                                 </div>
                                                 <input
@@ -406,7 +426,7 @@ function PatientEntry() {
                                                     value={formData.middleName}
                                                     onChange={handleInputChange}
                                                     placeholder="Middle Name (Optional)"
-                                                    className="w-full p-1 border border-slate-300 rounded text-[13px] font-bold outline-none uppercase bg-white focus:bg-slate-50"
+                                                    className="w-full p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none uppercase bg-white focus:bg-slate-50"
                                                 />
                                                 <input
                                                     type="text"
@@ -414,14 +434,14 @@ function PatientEntry() {
                                                     value={formData.lastName}
                                                     onChange={handleInputChange}
                                                     placeholder="Last Name"
-                                                    className="w-full p-1 border border-slate-300 rounded text-[13px] font-bold outline-none uppercase bg-white focus:bg-slate-50"
+                                                    className="w-full p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none uppercase bg-white focus:bg-slate-50"
                                                 />
                                             </div>
                                         </div>
 
                                         {/* Photo Section - Right After Name */}
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Patient Photo</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Patient Photo</label>
                                             <div className="flex items-center gap-3">
                                                 <input
                                                     type="file"
@@ -430,26 +450,26 @@ function PatientEntry() {
                                                     accept="image/jpeg,image/png"
                                                     className="hidden"
                                                 />
-                                                <div className="w-20 h-20 bg-white border-2 border-dashed border-slate-300 rounded-md overflow-hidden flex flex-col items-center justify-center text-slate-400 shadow-inner">
+                                                <div className="w-20 h-20 bg-white border-2 border-dashed border-slate-200 rounded-md overflow-hidden flex flex-col items-center justify-center text-slate-400 shadow-inner">
                                                     {formData.photo ? (
                                                         <img src={formData.photo} alt="Patient" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <>
-                                                            <MdPersonAdd size={24} className="text-slate-200" />
-                                                            <span className="text-[7px] font-black uppercase mt-0.5">No Photo</span>
+                                                            <MdPersonAdd size={24} className="text-slate-100" />
+                                                            <span className="text-[7px] font-poppins font-semibold uppercase mt-0.5 tracking-tighter">No Photo</span>
                                                         </>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={startCamera}
-                                                        className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded text-[10px] font-black uppercase hover:bg-blue-100 text-blue-700 transition-all flex items-center gap-1.5"
+                                                        className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded text-[10px] font-poppins font-semibold uppercase hover:bg-blue-100 text-blue-700 transition-all flex items-center gap-1.5"
                                                     >
                                                         <MdCameraAlt size={14} /> Capture
                                                     </button>
                                                     <button
                                                         onClick={triggerPhotoUpload}
-                                                        className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-[10px] font-black uppercase hover:bg-slate-100 text-slate-700 transition-all flex items-center gap-1.5"
+                                                        className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-[10px] font-poppins font-semibold uppercase hover:bg-slate-100 text-slate-700 transition-all flex items-center gap-1.5"
                                                     >
                                                         <MdFileUpload size={14} /> Upload
                                                     </button>
@@ -458,9 +478,9 @@ function PatientEntry() {
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Age & Sex</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Age & Sex</label>
                                             <div className="flex-1 flex gap-2">
-                                                <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-24 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none">
+                                                <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-24 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none bg-white">
                                                     <option value="Male">Male</option>
                                                     <option value="Female">Female</option>
                                                 </select>
@@ -470,9 +490,9 @@ function PatientEntry() {
                                                     value={formData.ageValue}
                                                     onChange={handleInputChange}
                                                     placeholder="00"
-                                                    className="w-14 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none text-center"
+                                                    className="w-14 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none text-center"
                                                 />
-                                                <select name="ageUnit" value={formData.ageUnit} onChange={handleInputChange} className="w-20 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none">
+                                                <select name="ageUnit" value={formData.ageUnit} onChange={handleInputChange} className="w-20 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none">
                                                     <option value="Yrs.">YRS</option>
                                                     <option value="Mon.">MON</option>
                                                     <option value="Days">DAY</option>
@@ -481,134 +501,122 @@ function PatientEntry() {
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Mobile</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Mobile</label>
                                             <input
                                                 type="text"
                                                 name="mobile"
                                                 value={formData.mobile || ""}
                                                 onChange={handleInputChange}
                                                 placeholder="98XXXXXXXX"
-                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none"
+                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none"
                                             />
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Email</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Email</label>
                                             <input
                                                 type="email"
                                                 name="email"
                                                 value={formData.email || ""}
                                                 onChange={handleInputChange}
                                                 placeholder="patient@example.com"
-                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none"
+                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none"
                                             />
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Address</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Address</label>
                                             <input
                                                 type="text"
                                                 name="address"
                                                 value={formData.address}
                                                 onChange={handleInputChange}
                                                 placeholder="City, District"
-                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] outline-none font-bold"
+                                                className="flex-1 p-1 border border-slate-300 rounded text-[13px] outline-none font-semibold"
                                             />
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Agent/By</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Agent/By</label>
                                             <div className="flex-1 flex gap-2">
-                                                <select name="agentName" value={formData.agentName} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none bg-orange-50/30">
+                                                <select name="agentName" value={formData.agentName} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none bg-orange-50/20">
                                                     <option value="SELF">SELF</option>
                                                     <option value="AGENT-001">AGENT-001</option>
                                                     <option value="HOSP-TRANS">HOSPITAL TRANSFER</option>
                                                 </select>
                                                 <div className="w-24 flex flex-col">
-                                                    <label className="text-[8px] font-black uppercase text-slate-400">Share/Fraction</label>
+                                                    <label className="text-[8px] font-poppins font-semibold uppercase text-slate-400">Share/Fraction</label>
                                                     <input
                                                         type="text"
                                                         name="agentShare"
                                                         value={formData.agentShare}
                                                         onChange={handleInputChange}
                                                         placeholder="0.00"
-                                                        className="w-full p-1 border border-slate-300 rounded text-[11px] font-black text-right text-orange-700 bg-orange-50"
+                                                        className="w-full p-1 border border-slate-300 rounded text-[11px] font-semibold text-right text-orange-700 bg-orange-50/50"
                                                     />
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-[12px] font-bold w-28 text-slate-500 uppercase shrink-0">Source</label>
+                                            <label className="text-[12px] font-medium w-28 text-slate-500 uppercase shrink-0">Source</label>
                                             <div className="flex-1 flex gap-2">
-                                                <select name="sampleSource" value={formData.sampleSource} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-bold outline-none">
+                                                <select name="sampleSource" value={formData.sampleSource} onChange={handleInputChange} className="flex-1 p-1 border border-slate-300 rounded text-[13px] font-semibold outline-none bg-white">
                                                     <option value="Internal">In-house</option>
                                                     <option value="External">External</option>
                                                 </select>
-                                                <MdLocalHospital size={16} className="text-blue-600 self-center" />
+                                                <MdLocalHospital size={16} className="text-blue-500 self-center" />
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </fieldset>
                             </div>
 
-
-
                             {/* Simplified Action Buttons */}
-                            <div className="grid grid-cols-2 gap-3 p-1 mt-2">
-                                <button onClick={() => setShowForm(false)} className="flex items-center justify-center gap-3 p-4 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95 group">
-                                    <MdSearch size={24} className="text-blue-600 group-hover:scale-110 transition-transform" />
+                            <div className="flex flex-col gap-3 p-1 mt-2">
+                                <button onClick={() => setShowForm(false)} className="flex items-center justify-center gap-3 p-3 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-all shadow-sm active:scale-95 group">
+                                    <MdSearch size={20} className="text-blue-600 group-hover:scale-110 transition-transform" />
                                     <div className="text-left">
-                                        <p className="text-[11px] font-black uppercase text-slate-800 leading-none">Patient List</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">View & Search All</p>
-                                    </div>
-                                </button>
-                                <button onClick={handleSaveNext} className="flex items-center justify-center gap-3 p-4 bg-emerald-600 border-2 border-emerald-700 rounded-xl hover:bg-emerald-700 transition-all shadow-lg active:scale-95 group">
-                                    <MdSave size={24} className="text-white group-hover:scale-110 transition-transform" />
-                                    <div className="text-left">
-                                        <p className="text-[11px] font-black uppercase text-white leading-none">Save & Register</p>
-                                        <p className="text-[9px] font-bold text-emerald-100 uppercase mt-0.5">Confirm & New</p>
+                                        <p className="text-[10px] font-poppins font-semibold uppercase text-slate-800 leading-none">Open Patient Database</p>
+                                        <p className="text-[8px] font-medium text-slate-400 uppercase mt-1">Search, Edit or View Master Records</p>
                                     </div>
                                 </button>
                             </div>
                         </div>
 
-                        {/* Middle Pane: Test Search */}
                         <div className="flex-1 flex flex-col gap-3">
                             <div className="bg-white border border-slate-300 p-3 rounded-lg shadow-sm flex-1 flex flex-col gap-3 overflow-hidden">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Available Services</label>
+                                    <label className="text-[10px] font-poppins font-semibold text-slate-500 uppercase tracking-widest">Available Services</label>
                                     <div className="relative">
                                         <input
                                             type="text"
                                             placeholder="Search test by name..."
-                                            className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-[12px] font-bold outline-none bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-400 transition-all"
+                                            className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-[12px] font-semibold outline-none bg-slate-50 focus:bg-white focus:ring-1 focus:ring-blue-400 transition-all"
                                             value={testSearch}
                                             onChange={(e) => setTestSearch(e.target.value)}
                                         />
                                         <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     </div>
                                 </div>
-                                <div className="flex-1 bg-slate-50/50 border border-slate-200 rounded-lg overflow-auto p-1 custom-scrollbar">
+                                <div className="flex-1 bg-slate-50/30 border border-slate-100 rounded-lg overflow-auto p-1 custom-scrollbar">
                                     {availableTests.filter(t => t.name.toLowerCase().includes(testSearch.toLowerCase())).map((test, i) => (
                                         <div
                                             key={i}
                                             onClick={() => toggleTestSelection(i)}
-                                            className={`group text-[11px] p-2.5 mb-1 cursor-pointer transition-all border-2 rounded-md uppercase font-black flex justify-between items-center ${multiSelectedIndexes.includes(i) ? 'bg-blue-600 border-blue-700 text-white shadow-md' : 'hover:bg-white hover:border-blue-200 border-transparent text-slate-600 shadow-sm bg-white'}`}
+                                            className={`group text-[11px] p-2.5 mb-1 cursor-pointer transition-all border rounded-md uppercase font-semibold flex justify-between items-center ${multiSelectedIndexes.includes(i) ? 'bg-blue-600 border-blue-700 text-white shadow-sm' : 'hover:bg-white hover:border-blue-200 border-slate-100 text-slate-600 bg-white'}`}
                                         >
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-3.5 h-3.5 rounded border ${multiSelectedIndexes.includes(i) ? 'bg-white border-white' : 'border-slate-300 bg-slate-50'}`}>
+                                                <div className={`w-3.5 h-3.5 rounded border ${multiSelectedIndexes.includes(i) ? 'bg-white border-white' : 'border-slate-200 bg-slate-50'}`}>
                                                     {multiSelectedIndexes.includes(i) && <div className="w-full h-full text-blue-600 flex items-center justify-center">✓</div>}
                                                 </div>
                                                 <span>{test.name}</span>
                                             </div>
-                                            <span className={`text-[9px] px-2 py-0.5 rounded-full ${multiSelectedIndexes.includes(i) ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>रु {test.fees}</span>
+                                            <span className={`text-[9px] px-2 py-0.5 rounded-full ${multiSelectedIndexes.includes(i) ? 'bg-blue-500 text-white font-bold' : 'bg-slate-50 text-slate-400 font-medium group-hover:bg-blue-50 group-hover:text-blue-600'}`}>रु {test.fees}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={addTest} className={`w-full py-2.5 rounded-lg font-black text-[11px] uppercase shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${multiSelectedIndexes.length > 0 ? 'bg-slate-800 text-white hover:bg-black cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+                                <button onClick={addTest} className={`w-full py-2.5 rounded-lg font-poppins font-semibold text-[11px] uppercase shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${multiSelectedIndexes.length > 0 ? 'bg-slate-800 text-white hover:bg-black cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
                                     <MdAddCircleOutline size={18} /> Add {multiSelectedIndexes.length || ""} Items to Bill
                                 </button>
                             </div>
@@ -617,132 +625,128 @@ function PatientEntry() {
                         {/* Right Pane: Bill Preview */}
                         <div className="flex-1 flex flex-col gap-3">
                             <div className="bg-white border border-slate-300 p-3 rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
-                                <div className="flex-1 border border-slate-200 rounded-lg overflow-auto custom-scrollbar bg-slate-50/20">
+                                <div className="flex-1 border border-slate-200 rounded-lg overflow-auto custom-scrollbar bg-slate-50/10">
                                     <table className="w-full text-left text-[11px] border-collapse">
                                         <thead className="sticky top-0 bg-[#f8fafc] border-b border-slate-300 z-10 shadow-sm">
                                             <tr>
-                                                <th className="px-3 py-3 font-black text-slate-600 uppercase tracking-tighter">Test Name</th>
-                                                <th className="px-2 py-3 font-black text-slate-600 uppercase text-center w-20 tracking-tighter">Fees</th>
-                                                <th className="px-2 py-3 font-black text-slate-600 uppercase text-center w-20 tracking-tighter">Disc.</th>
-                                                <th className="px-3 py-3 font-black text-slate-600 uppercase text-right w-24 tracking-tighter">Net</th>
+                                                <th className="px-3 py-3 font-poppins font-semibold text-slate-600 uppercase tracking-wider">Test Name</th>
+                                                <th className="px-2 py-3 font-poppins font-semibold text-slate-600 uppercase text-center w-20 tracking-wider">Fees</th>
+                                                <th className="px-2 py-3 font-poppins font-semibold text-slate-600 uppercase text-center w-20 tracking-wider">Disc.</th>
+                                                <th className="px-3 py-3 font-poppins font-semibold text-slate-600 uppercase text-right w-24 tracking-wider">Net</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100">
+                                        <tbody className="divide-y divide-slate-50">
                                             {selectedTests.map((test, i) => (
                                                 <tr key={test.id || i} className="group hover:bg-slate-50 transition-colors bg-white">
-                                                    <td className="px-3 py-2 uppercase text-slate-700 font-black relative">
+                                                    <td className="px-3 py-2 uppercase text-slate-700 font-medium relative">
                                                         {test.name}
                                                         <button
                                                             onClick={() => removeTest(i)}
-                                                            className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-all"
+                                                            className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-rose-500 text-white rounded-full p-0.5 hover:bg-rose-600 transition-all shadow-sm"
                                                         >
                                                             <MdClose size={12} />
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 py-2 text-center text-slate-500 font-bold">{test.fees.toFixed(0)}</td>
+                                                    <td className="px-2 py-2 text-center text-slate-400 font-medium">{test.fees.toFixed(0)}</td>
                                                     <td className="px-2 py-2">
                                                         <input
                                                             type="text"
                                                             value={test.discount}
                                                             onChange={(e) => handleTestDiscountChange(i, e.target.value)}
-                                                            className="w-full p-1 border border-slate-200 rounded text-center text-[10px] font-black outline-none focus:border-blue-400"
+                                                            className="w-full p-1 border border-slate-100 rounded text-center text-[10px] font-semibold outline-none focus:border-blue-400 focus:bg-blue-50/10 transition-colors"
                                                         />
                                                     </td>
-                                                    <td className="px-3 py-2 text-right font-black text-slate-900">रु {(test.fees - (test.discount || 0)).toFixed(2)}</td>
+                                                    <td className="px-3 py-2 text-right font-semibold text-slate-900">रु {(test.fees - (test.discount || 0)).toFixed(2)}</td>
                                                 </tr>
                                             ))}
                                             {selectedTests.length === 0 && (
-                                                <tr><td colSpan="4" className="px-3 py-24 text-center text-slate-300 italic uppercase font-black tracking-widest text-[10px]">No services selected for bill</td></tr>
+                                                <tr><td colSpan="4" className="px-3 py-24 text-center text-slate-300 italic uppercase font-semibold tracking-widest text-[10px]">No services selected for bill</td></tr>
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
 
-                            {/* Enhanced Billing Summary with Multiple Payment Types */}
                             <div className="bg-white border border-slate-300 p-4 rounded-lg shadow-md space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase">Sub Total (Gross)</label>
-                                    <div className="text-[14px] font-black text-slate-900">रु {totalFees.toFixed(2)}</div>
+                                    <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Sub Total (Gross)</label>
+                                    <div className="text-[14px] font-poppins font-semibold text-slate-900">रु {totalFees.toFixed(2)}</div>
                                 </div>
 
-                                <div className="flex items-center justify-between text-red-600">
-                                    <label className="text-[10px] font-black uppercase">Item-wise Discount</label>
-                                    <div className="text-[12px] font-black">- रु {totalTestDiscounts.toFixed(2)}</div>
+                                <div className="flex items-center justify-between text-rose-500">
+                                    <label className="text-[10px] font-medium uppercase tracking-wider">Item-wise Discount</label>
+                                    <div className="text-[12px] font-semibold">- रु {totalTestDiscounts.toFixed(2)}</div>
                                 </div>
 
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between border-t border-slate-50 pt-1">
                                     <div className="flex items-center gap-2">
-                                        <input type="checkbox" name="freeOfCost" checked={formData.freeOfCost} onChange={handleInputChange} className="w-3.5 h-3.5 accent-blue-700" id="foc" />
-                                        <label htmlFor="foc" className="text-[10px] font-black text-slate-500 uppercase cursor-pointer">Free of Cost</label>
+                                        <input type="checkbox" name="freeOfCost" checked={formData.freeOfCost} onChange={handleInputChange} className="w-3.5 h-3.5 accent-blue-600" id="foc" />
+                                        <label htmlFor="foc" className="text-[10px] font-medium text-slate-400 uppercase cursor-pointer tracking-wider">Free of Cost</label>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase">Discount</label>
+                                        <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Add. Discount</label>
                                         <input
                                             type="text"
                                             name="discountAmount"
                                             value={formData.discountAmount}
                                             onChange={handleInputChange}
-                                            className="w-20 p-1 border border-slate-300 rounded text-[11px] font-black text-right text-red-600 bg-red-50"
+                                            className="w-20 p-1 border border-slate-100 rounded text-[11px] font-semibold text-right text-rose-600 bg-rose-50/30 outline-none focus:ring-1 focus:ring-rose-200"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                                    <label className="text-[11px] font-black text-slate-800 uppercase tracking-tighter italic font-serif">Net Payable</label>
-                                    <div className="text-[18px] font-black text-[#065f46] tracking-tighter">रु {payable.toFixed(2)}</div>
+                                    <label className="text-[11px] font-poppins font-medium text-slate-800 uppercase tracking-widest italic tracking-tighter">Net Payable</label>
+                                    <div className="text-[20px] font-poppins font-bold text-[#065f46]">रु {payable.toFixed(2)}</div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-50">
+                                <div className="grid grid-cols-2 gap-3 mt-2 pt-2 border-t border-slate-50">
                                     <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div> Cash Payment</label>
+                                        <label className="text-[9px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1"><div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div> Cash Payment</label>
                                         <input
                                             type="text"
                                             name="cashAmount"
                                             value={formData.cashAmount}
                                             onChange={handleInputChange}
-                                            className="w-full p-1.5 bg-[#fafff0] border border-slate-200 rounded text-[12px] font-black text-right text-slate-800 outline-none focus:ring-1 focus:ring-green-400"
+                                            className="w-full p-2 bg-emerald-50/10 border border-slate-100 rounded text-[13px] font-semibold text-right text-slate-700 outline-none focus:ring-1 focus:ring-emerald-200"
                                             placeholder="0.00"
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div> Online / FonePay</label>
+                                        <label className="text-[9px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1"><div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div> Online / FonePay</label>
                                         <input
                                             type="text"
                                             name="onlineAmount"
                                             value={formData.onlineAmount}
                                             onChange={handleInputChange}
-                                            className="w-full p-1.5 bg-[#f0f9ff] border border-slate-200 rounded text-[12px] font-black text-right text-slate-800 outline-none focus:ring-1 focus:ring-blue-400"
+                                            className="w-full p-2 bg-blue-50/10 border border-slate-100 rounded text-[13px] font-semibold text-right text-slate-700 outline-none focus:ring-1 focus:ring-blue-200"
                                             placeholder="0.00"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between pt-1">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase">Total Paid</label>
-                                    <div className="text-[12px] font-black text-slate-700">रु {totalPaid.toFixed(2)}</div>
+                                    <label className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Total Received</label>
+                                    <div className="text-[12px] font-semibold text-slate-700">रु {totalPaid.toFixed(2)}</div>
                                 </div>
 
-                                <div className="flex items-center justify-between p-2 bg-red-50 border border-red-100 rounded-lg">
-                                    <label className="text-[11px] font-black text-red-400 uppercase tracking-widest">Balance Due</label>
-                                    <div className="text-[16px] font-black text-red-700">रु {due.toFixed(2)}</div>
+                                <div className="flex items-center justify-between p-2 bg-rose-50/50 border border-rose-100 rounded-lg">
+                                    <label className="text-[11px] font-poppins font-semibold text-rose-400 uppercase tracking-[0.1em]">Balance Due</label>
+                                    <div className="text-[16px] font-poppins font-bold text-rose-600">रु {due.toFixed(2)}</div>
                                 </div>
 
 
-                                <div className="grid grid-cols-2 gap-2 mt-1">
+                                <div className="grid grid-cols-1 gap-2 mt-1">
                                     <button
-                                        onClick={() => {
-                                            if (selectedTests.length === 0) {
-                                                alert("Please add at least one test to preview the bill");
-                                                return;
-                                            }
-                                            setShowCurrentBillPreview(true);
-                                        }}
-                                        className="w-full bg-blue-600 text-white py-2 rounded-lg font-black text-[10px] uppercase shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95"
+                                        onClick={handleFinalizeEntry}
+                                        className="w-full bg-emerald-600 text-white py-3 rounded-xl font-poppins font-semibold text-[13px] uppercase shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] border-b-2 border-emerald-800"
                                     >
-                                        <MdPayments size={14} /> Generate Bill
+                                        <div className="flex items-center gap-2">
+                                            <MdSave size={18} />
+                                            <span>Finalize & Print Bill</span>
+                                        </div>
+                                        <span className="text-[8px] opacity-70 font-medium uppercase tracking-[0.2em]">Register & Invoicing</span>
                                     </button>
-
                                 </div>
                             </div>
                         </div>
@@ -758,7 +762,7 @@ function PatientEntry() {
                                 <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                                 <input
                                     type="text"
-                                    className="pl-10 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm w-[500px] outline-none focus:border-emerald-600 font-bold uppercase transition-all"
+                                    className="pl-10 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-lg text-sm w-[500px] outline-none focus:border-emerald-600 font-semibold uppercase transition-all"
                                     placeholder="Search by name, ID or phone..."
                                     value={searchTerm}
                                     autoFocus
@@ -771,26 +775,26 @@ function PatientEntry() {
                                 resetForm();
                                 setShowForm(true);
                             }}
-                            className="bg-emerald-600 text-white px-8 py-3 rounded-lg font-black text-[11px] uppercase shadow-lg hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-2"
+                            className="bg-emerald-600 text-white px-8 py-3 rounded-lg font-poppins font-semibold text-[12px] uppercase shadow-md hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-2"
                         >
                             <MdPersonAdd size={18} /> Register New Patient
                         </button>
                     </div>
 
-                    <div className="flex-1 border-2 border-slate-300 rounded-xl overflow-auto bg-white shadow-xl custom-scrollbar">
+                    <div className="flex-1 border border-slate-200 rounded-xl overflow-auto bg-white shadow-xl custom-scrollbar">
                         <table className="w-full text-left border-collapse">
                             <thead className="sticky top-0 z-20">
-                                <tr className="bg-slate-800 text-white text-[11px] uppercase font-black tracking-widest">
-                                    <th className="px-6 py-4 border-r border-slate-700/50 w-24 text-center text-emerald-400">Photo</th>
-                                    <th className="px-6 py-4 border-r border-slate-700/50 w-24 text-center">Patient ID</th>
-                                    <th className="px-6 py-4 border-r border-slate-700/50">Patient Name</th>
-                                    <th className="px-6 py-4 border-r border-slate-700/50 w-64">Email Address</th>
-                                    <th className="px-6 py-4 border-r border-slate-700/50 w-44">Age / Gender</th>
-                                    <th className="px-6 py-4 border-r border-slate-700/50 w-52 text-center">Phone</th>
+                                <tr className="bg-slate-800 text-white text-[11px] font-poppins font-medium uppercase tracking-widest">
+                                    <th className="px-6 py-4 border-r border-slate-700/30 w-24 text-center text-emerald-400">Photo</th>
+                                    <th className="px-6 py-4 border-r border-slate-700/30 w-24 text-center">Patient ID</th>
+                                    <th className="px-6 py-4 border-r border-slate-700/30">Patient Name</th>
+                                    <th className="px-6 py-4 border-r border-slate-700/30 w-64">Email Address</th>
+                                    <th className="px-6 py-4 border-r border-slate-700/30 w-44">Age / Gender</th>
+                                    <th className="px-6 py-4 border-r border-slate-700/30 w-52 text-center">Phone</th>
                                     <th className="px-6 py-4 text-center w-36">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-xs font-bold text-slate-800 uppercase divide-y divide-slate-100">
+                            <tbody className="text-xs font-semibold text-slate-600 uppercase divide-y divide-slate-50">
                                 {filteredRegistry.map((p, i) => (
                                     <tr key={i} className={`hover:bg-emerald-50/50 transition-colors ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
                                         <td className="px-6 py-2 border-r border-slate-100/50">
@@ -826,8 +830,8 @@ function PatientEntry() {
                 <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-w-lg w-full">
                         <div className="p-4 border-b border-white/10 flex items-center justify-between text-white">
-                            <span className="text-[12px] font-black uppercase tracking-widest">Live Patient Camera</span>
-                            <button onClick={stopCamera} className="hover:bg-red-500/20 p-1.5 rounded-full text-red-400"><MdClose size={20} /></button>
+                            <span className="text-[12px] font-poppins font-semibold uppercase tracking-widest">Live Patient Camera</span>
+                            <button onClick={stopCamera} className="hover:bg-rose-500/20 p-1.5 rounded-full text-rose-400 transition-colors"><MdClose size={20} /></button>
                         </div>
                         <div className="relative aspect-video bg-black flex items-center justify-center">
                             <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
@@ -839,10 +843,10 @@ function PatientEntry() {
                                 className="w-20 h-20 bg-white rounded-full border-8 border-slate-600 hover:scale-110 active:scale-95 transition-all shadow-xl flex items-center justify-center overflow-hidden"
                                 title="Click to Capture"
                             >
-                                <div className="w-full h-full bg-red-600 rounded-full scale-50 group-active:scale-100 transition-all"></div>
+                                <div className="w-full h-full bg-rose-600 rounded-full scale-50 group-active:scale-100 transition-all"></div>
                             </button>
                         </div>
-                        <p className="text-slate-400 text-[10px] uppercase font-black text-center pb-4 tracking-tighter">Position the face within the frame and click the white button</p>
+                        <p className="text-slate-400 text-[10px] uppercase font-poppins font-medium text-center pb-6 tracking-widest opacity-80">Position face within frame and capture</p>
                     </div>
                 </div>
             )}
@@ -854,10 +858,10 @@ function PatientEntry() {
                         {/* Header */}
                         <div className="p-4 bg-slate-800 flex items-center justify-between text-white border-b border-slate-700">
                             <div>
-                                <h2 className="text-[13px] font-black uppercase tracking-widest">Patient Billing History</h2>
-                                <p className="text-[10px] font-bold text-slate-300 mt-0.5">{patientBillHistory.length} Previous Transaction{patientBillHistory.length > 1 ? 's' : ''} Found</p>
+                                <h2 className="text-[13px] font-poppins font-semibold uppercase tracking-widest">Patient Billing History</h2>
+                                <p className="text-[10px] font-medium text-slate-400 mt-0.5">{patientBillHistory.length} Previous Transaction{patientBillHistory.length > 1 ? 's' : ''} Found</p>
                             </div>
-                            <button onClick={() => setShowBillHistoryModal(false)} className="hover:bg-white/20 p-2 rounded-full transition-all">
+                            <button onClick={() => setShowBillHistoryModal(false)} className="hover:bg-white/10 p-2 rounded-full transition-all">
                                 <MdClose size={24} />
                             </button>
                         </div>
@@ -866,7 +870,7 @@ function PatientEntry() {
                         <div className="flex-1 overflow-auto bg-slate-50">
                             <table className="w-full text-left border-collapse">
                                 <thead className="sticky top-0 z-10">
-                                    <tr className="bg-slate-700 text-white text-[11px] uppercase font-black tracking-wider">
+                                    <tr className="bg-slate-700 text-white text-[11px] uppercase font-poppins font-medium tracking-widest">
                                         <th className="px-4 py-3 border-r border-slate-600 w-32">Bill ID</th>
                                         <th className="px-4 py-3 border-r border-slate-600 w-36">Date</th>
                                         <th className="px-4 py-3 border-r border-slate-600">Tests/Services</th>
@@ -875,7 +879,7 @@ function PatientEntry() {
                                         <th className="px-4 py-3 text-center w-48">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-[12px] font-bold text-slate-800 divide-y divide-slate-200">
+                                <tbody className="text-[12px] font-semibold text-slate-600 divide-y divide-slate-100">
                                     {patientBillHistory.map((bill, idx) => (
                                         <tr key={idx} className="bg-white hover:bg-blue-50/50 transition-colors">
                                             <td className="px-4 py-3 border-r border-slate-200">

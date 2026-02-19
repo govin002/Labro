@@ -199,8 +199,8 @@ const BillReceiptModal = ({ bill, onClose }) => {
             <div className="bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col max-w-4xl w-full max-h-[95vh]">
                 <div className="p-4 bg-slate-800 flex items-center justify-between text-white">
                     <div>
-                        <h2 className="text-[13px] font-black uppercase tracking-widest">Bill Receipt Preview</h2>
-                        <p className="text-[10px] font-bold text-slate-300">Bill No: {bill.billNo}</p>
+                        <h2 className="text-[13px] font-poppins font-semibold uppercase tracking-widest">Bill Receipt Preview</h2>
+                        <p className="text-[10px] font-medium text-slate-400">Bill No: {bill.billNo}</p>
                     </div>
                     <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition-all">
                         <MdClose size={24} />
@@ -209,21 +209,21 @@ const BillReceiptModal = ({ bill, onClose }) => {
 
                 <div className="p-3 bg-slate-100 border-b border-slate-300 space-y-2">
                     <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-black text-slate-700 uppercase">Print Options:</span>
+                        <span className="text-[11px] font-poppins font-semibold text-slate-600 uppercase tracking-wider">Print Options:</span>
                         <div className="flex gap-2">
-                            <button onClick={() => printBill(true)} className="px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase rounded hover:bg-blue-700 shadow-sm flex items-center gap-1.5 transition-all active:scale-95">
+                            <button onClick={() => printBill(true)} className="px-4 py-2 bg-blue-600 text-white text-[10px] font-poppins font-semibold uppercase rounded hover:bg-blue-700 shadow-sm flex items-center gap-1.5 transition-all active:scale-95">
                                 <MdReceipt size={14} /> With Letterhead
                             </button>
-                            <button onClick={() => printBill(false)} className="px-4 py-2 bg-slate-600 text-white text-[10px] font-black uppercase rounded hover:bg-slate-700 shadow-sm flex items-center gap-1.5 transition-all active:scale-95">
+                            <button onClick={() => printBill(false)} className="px-4 py-2 bg-slate-600 text-white text-[10px] font-poppins font-semibold uppercase rounded hover:bg-slate-700 shadow-sm flex items-center gap-1.5 transition-all active:scale-95">
                                 <MdReceipt size={14} /> Without Letterhead
                             </button>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-black text-slate-700 uppercase">Paper Size:</span>
+                        <span className="text-[11px] font-poppins font-semibold text-slate-600 uppercase tracking-wider">Paper Size:</span>
                         <div className="flex gap-2">
                             {['A4', 'A5'].map(size => (
-                                <button key={size} onClick={() => setPaperSize(size)} className={`px-4 py-1.5 text-[9px] font-black uppercase rounded transition-all ${paperSize === size ? 'bg-emerald-600 text-white' : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'}`}>
+                                <button key={size} onClick={() => setPaperSize(size)} className={`px-4 py-1.5 text-[9px] font-poppins font-semibold uppercase rounded transition-all ${paperSize === size ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
                                     {size} {size === 'A4' ? '(210×297mm)' : '(148×210mm)'}
                                 </button>
                             ))}
@@ -238,71 +238,71 @@ const BillReceiptModal = ({ bill, onClose }) => {
                                 <svg id="barcode-preview"></svg>
                             </div>
                             <div className="w-1/3 text-center">
-                                <div className="inline-block border-2 border-slate-900 px-6 py-2 font-black tracking-tighter text-[16px] uppercase">
+                                <div className="inline-block border-2 border-slate-900 px-6 py-2 font-poppins font-semibold tracking-widest text-[16px] uppercase">
                                     Bill / RECEIPT
                                 </div>
                             </div>
-                            <div className="w-1/3 text-[11px] font-bold text-slate-700 text-right">
-                                <div className="mb-0.5">Bill No : <span className="font-black text-slate-900">{bill.billNo}</span></div>
-                                <div className="mb-0.5">Age/Gender : <span className="font-black text-slate-900">{bill.ageGender}</span></div>
-                                <div className="mb-0.5">Date : <span className="font-black text-slate-900">{bill.date}</span></div>
-                                <div>Mobile : <span className="font-black text-slate-900">{bill.mobile}</span></div>
+                            <div className="w-1/3 text-[11px] font-medium text-slate-600 text-right">
+                                <div className="mb-0.5">Bill No : <span className="font-semibold text-slate-900">{bill.billNo}</span></div>
+                                <div className="mb-0.5">Age/Gender : <span className="font-semibold text-slate-900">{bill.ageGender}</span></div>
+                                <div className="mb-0.5">Date : <span className="font-semibold text-slate-900">{bill.date}</span></div>
+                                <div>Mobile : <span className="font-semibold text-slate-900">{bill.mobile}</span></div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-1.5 mb-8 text-[12px] font-bold text-slate-800">
+                        <div className="grid grid-cols-1 gap-1.5 mb-8 text-[12px] font-medium text-slate-700">
                             <div className="flex border-b border-slate-100 pb-1">
-                                <span className="w-36 text-slate-500 font-medium">Patient's Name</span>
-                                <span className="uppercase font-black flex-1">: {bill.patientName}</span>
+                                <span className="w-36 text-slate-400 font-medium uppercase text-[10px] tracking-wider">Patient's Name</span>
+                                <span className="uppercase font-semibold text-slate-900 flex-1">: {bill.patientName}</span>
                             </div>
                             <div className="flex border-b border-slate-100 pb-1">
-                                <span className="w-36 text-slate-500 font-medium">Ref. By</span>
-                                <span className="uppercase font-black flex-1">: {bill.refBy}</span>
+                                <span className="w-36 text-slate-400 font-medium uppercase text-[10px] tracking-wider">Ref. By</span>
+                                <span className="uppercase font-semibold text-slate-900 flex-1">: {bill.refBy}</span>
                             </div>
                             <div className="flex">
-                                <span className="w-36 text-slate-500 font-medium">Patient's Address</span>
-                                <span className="uppercase font-black flex-1">: {bill.address || '-'}</span>
+                                <span className="w-36 text-slate-400 font-medium uppercase text-[10px] tracking-wider">Patient's Address</span>
+                                <span className="uppercase font-semibold text-slate-900 flex-1">: {bill.address || '-'}</span>
                             </div>
                         </div>
 
                         <table className="w-full mb-8 text-[13px] border-collapse">
                             <thead>
                                 <tr className="border-y-2 border-slate-900 bg-slate-50">
-                                    <th className="w-12 text-center py-2.5 px-2">Sr.</th>
-                                    <th className="text-left py-2.5 px-4 font-black">Test Name</th>
-                                    <th className="w-32 text-right py-2.5 px-4 font-black">Amount</th>
+                                    <th className="w-12 text-center py-2.5 px-2 font-poppins font-medium text-slate-600 uppercase">Sr.</th>
+                                    <th className="text-left py-2.5 px-4 font-poppins font-semibold text-slate-900 uppercase">Test Name</th>
+                                    <th className="w-32 text-right py-2.5 px-4 font-poppins font-semibold text-slate-900 uppercase">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200">
+                            <tbody className="divide-y divide-slate-100">
                                 {(bill.tests || []).map((test, i) => (
                                     <tr key={i} className="hover:bg-slate-50/50">
-                                        <td className="text-center py-3 px-2 font-medium">{i + 1}</td>
-                                        <td className="py-3 px-4 font-bold">{test.name}</td>
-                                        <td className="text-right py-3 px-4 font-black">{(test.amount || 0).toFixed(2)}</td>
+                                        <td className="text-center py-3 px-2 font-medium text-slate-400">{i + 1}</td>
+                                        <td className="py-3 px-4 font-semibold text-slate-800 transition-colors">{test.name}</td>
+                                        <td className="text-right py-3 px-4 font-semibold text-slate-900">{(test.amount || 0).toFixed(2)}</td>
                                     </tr>
                                 ))}
                                 {(!bill.tests || bill.tests.length === 0) && bill.items && (
                                     <tr>
-                                        <td className="text-center py-3 px-2">1</td>
-                                        <td className="py-3 px-4 font-bold">{bill.items}</td>
-                                        <td className="text-right py-3 px-4 font-black">{(bill.totalAmount || 0).toFixed(2)}</td>
+                                        <td className="text-center py-3 px-2 font-medium text-slate-400">1</td>
+                                        <td className="py-3 px-4 font-semibold text-slate-800">{bill.items}</td>
+                                        <td className="text-right py-3 px-4 font-semibold text-slate-900">{(bill.totalAmount || 0).toFixed(2)}</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
 
                         <div className="flex justify-between items-start pt-4 border-t border-slate-200">
-                            <div className="w-3/5 text-[10px] font-bold text-slate-600 space-y-2">
-                                <div className="pb-1 border-b border-slate-100">Paid Amount in word : <span className="text-slate-900 font-black">Rupees {bill.paymentReceived === 0 ? 'Zero' : `${bill.paymentReceived} Only`}</span></div>
-                                <div>Due Amount in word : <span className="text-slate-900 font-black">Rupees {bill.dueAmount === 0 ? 'Zero' : `${bill.dueAmount} Only`}</span></div>
+                            <div className="w-3/5 text-[10px] font-medium text-slate-400 space-y-2 uppercase tracking-wide">
+                                <div className="pb-1 border-b border-slate-50">Paid Amount in word : <span className="text-slate-700 font-semibold tracking-normal">Rupees {bill.paymentReceived === 0 ? 'Zero' : `${bill.paymentReceived} Only`}</span></div>
+                                <div className="text-rose-500/70">Due Amount in word : <span className="text-rose-600 font-semibold tracking-normal">Rupees {bill.dueAmount === 0 ? 'Zero' : `${bill.dueAmount} Only`}</span></div>
                             </div>
-                            <div className="w-2/5 text-[12px] font-bold text-slate-800">
-                                <div className="flex justify-between py-1"><span>Total Amount:</span><span className="w-24 text-right">{(bill.totalAmount || 0).toFixed(2)}</span></div>
-                                <div className="flex justify-between py-1"><span>Discount:</span><span className="w-24 text-right">{(bill.discountAmount || 0).toFixed(2)}</span></div>
-                                <div className="flex justify-between py-2 border-t border-slate-300 my-1"><span className="uppercase text-[11px] text-slate-500">Received:</span><span className="w-24 text-right font-black">{(bill.paymentReceived || 0).toFixed(2)}</span></div>
-                                <div className="flex justify-between py-2.5 border-t-2 border-slate-900 mt-1 bg-slate-900 text-white px-2 rounded-sm shadow-md transition-all active:scale-[0.98]">
-                                    <span className="font-black text-[14px] uppercase tracking-tighter">Due :</span>
-                                    <span className="w-24 text-right font-black text-[14px]">{(bill.dueAmount || 0).toFixed(2)}</span>
+                            <div className="w-2/5 text-[12px] font-medium text-slate-600">
+                                <div className="flex justify-between py-1"><span>Total Amount:</span><span className="w-24 text-right font-semibold text-slate-900">{(bill.totalAmount || 0).toFixed(2)}</span></div>
+                                <div className="flex justify-between py-1 border-b border-slate-50"><span>Discount:</span><span className="w-24 text-right font-semibold text-rose-500">- रु {(bill.discountAmount || 0).toFixed(2)}</span></div>
+                                <div className="flex justify-between py-2 my-1"><span className="uppercase text-[9px] text-slate-400 tracking-widest font-semibold">Received:</span><span className="w-24 text-right font-semibold text-emerald-600">{(bill.paymentReceived || 0).toFixed(2)}</span></div>
+                                <div className="flex justify-between py-2.5 border-t-2 border-slate-900 mt-1 bg-slate-900 text-white px-3 rounded-md shadow-lg transition-all active:scale-[0.98]">
+                                    <span className="font-poppins font-semibold text-[13px] uppercase tracking-widest">Due :</span>
+                                    <span className="w-24 text-right font-poppins font-bold text-[14px]">रु {(bill.dueAmount || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -310,7 +310,7 @@ const BillReceiptModal = ({ bill, onClose }) => {
                 </div>
 
                 <div className="p-4 bg-slate-800 flex items-center justify-end border-t border-slate-700">
-                    <button onClick={onClose} className="px-8 py-2.5 bg-white text-slate-900 text-[11px] font-black uppercase rounded-lg hover:bg-slate-100 transition-all active:scale-95 shadow-xl">
+                    <button onClick={onClose} className="px-8 py-2.5 bg-white text-slate-900 text-[11px] font-poppins font-semibold uppercase rounded-lg hover:bg-slate-100 transition-all active:scale-95 shadow-xl">
                         Close Preview
                     </button>
                 </div>
