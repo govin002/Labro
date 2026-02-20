@@ -22,6 +22,7 @@ const LoginForm = () => {
                         <input
                             type="text"
                             required
+                            autoComplete="username"
                             className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-900 font-bold outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-300 shadow-sm"
                             placeholder="Username..."
                             value={username}
@@ -40,6 +41,7 @@ const LoginForm = () => {
                         <input
                             type="password"
                             required
+                            autoComplete="current-password"
                             className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-900 font-bold outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-slate-300 shadow-sm"
                             placeholder="••••••••"
                             value={password}
